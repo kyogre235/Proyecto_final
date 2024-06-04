@@ -1,0 +1,17 @@
+%% ejemplos de uso:
+% tablero de 3x3
+% tablero([[vac,vac,vac],
+%          [ron,vac,nor],
+%          [ven,vac,fin]]).
+
+raton([[vac,vac,vac],[ron,vac,nor],[ven,vac,fin]],(0,0),3,3,su,R).
+
+
+%tablero de 4x4
+%tablero([[nor,vac,ron,vac],
+%         [vac,ven,vac,nor],
+%         [fin,vac,vac,nor],
+%         [vac,vac,vac,vac]]).
+
+
+raton([[nor,vac,ron,vac],[vac,ven,vac,nor],[fin,vac,vac,nor],[vac,vac,vac,vac]],(0,0),4,4,es,R).
