@@ -1,4 +1,6 @@
-%% el queso puede terner distintos tipos de estados, como consideraremos que el tablero va a tener quesos en todas la casillas (para facilitar la implementacion) se añadira el queso vacio. Lo definimos a continuacion:
+%% el queso puede terner distintos tipos de estados, 
+%% como consideraremos que el tablero va a tener quesos en todas la casillas (para facilitar la implementacion) se añadira el queso vacio. 
+%% Lo definimos a continuacion:
 % - nor = Normal
 % - ron = Ron
 % - ven = Veneno
@@ -66,13 +68,14 @@ girar(es,no).
 % - Estado = nos dice si el raton esta borracho o no, 0 es sobrio y cualquier n > 0 es ebrio (max. 7)
 
 
-movSec((X,Y), D, N, M, Estado, (NX,NY),ND) :- 
+movSec((X,Y), D, N, M, Estado, (NX,NY),ND,R) :- 
     mover((X,Y), D, (C,V)),
     verificar((C,V), N, M, Z),
     rectificar((C,V), N, M, D, Z, (NC,NV), NewD),
     (Estado < 1 -> NX is NC, NY is NV, igual(NewD,ND);
         NX is NC, NY is NV, igual(D,ND) 
-    ). 
+    ),
+    R is Z.
 
 %% como el raton se va a estar moviendo, tenemos que saber que hay en cada casilla:
 
@@ -92,14 +95,16 @@ moverRaton(Tablero, (X,Y), N, M, D, Estado, Pasos, Resultado) :-
 accion(Tablero, (X,Y), N, M, D, Estado, vac, Pasos, Resultado):-
     random(0, 4, Rnd),
     nth0(Rnd, [no,su,es,oe], RD), 
-    movSec((X,Y), D, N, M, Estado, (NX,NY), ND),
+    movSec((X,Y), D, N, M, Estado, (NX,NY), ND, R),
     (Estado < 1 -> moverRaton(Tablero, (NX,NY), N, M, ND, Estado, [(X,Y)|Pasos], Resultado);
-    NewEstado is Estado - 1, moverRaton(Tablero, (NX,NY), N, M, RD, NewEstado, [(X,Y)|Pasos], Resultado) 
+    (R > 0 -> NewEstado is Estado - 1, moverRaton(Tablero, (NX,NY), N, M, ND, NewEstado, [(X,Y)|Pasos], Resultado);
+        NewEstado is Estado - 1, moverRaton(Tablero, (NX,NY), N, M, RD, NewEstado, [(X,Y)|Pasos], Resultado) 
+     ) 
     ).
 % acciones posibles si la casilla tiene un queso normal    
 accion(Tablero, (X,Y), N, M, D, Estado, nor, Pasos, Resultado):-
     comerQueso(Tablero, Y, X, vac, NewTablero), 
-    movSec((X,Y), D, N, M, Estado, (NX,NY),ND),
+    movSec((X,Y), D, N, M, Estado, (NX,NY),ND,_),
     (Estado < 1 -> moverRaton(NewTablero, (NX,NY), N, M, ND, Estado, [(X,Y)|Pasos],Resultado);
     NewEstado is Estado - 1, moverRaton(NewTablero, (NX,NY), N, M, ND, NewEstado, [(X,Y)|Pasos],Resultado) 
     ).
@@ -107,7 +112,7 @@ accion(Tablero, (X,Y), N, M, D, Estado, nor, Pasos, Resultado):-
 accion(Tablero, (X,Y), N, M, _, Estado, ron, Pasos, Resultado):-
     random(0, 4, Rnd),
     nth0(Rnd, [no,su,es,oe], RD),  
-    movSec((X,Y), RD, N, M, Estado, (NX,NY),ND),
+    movSec((X,Y), RD, N, M, Estado, (NX,NY),ND,_),
     comerQueso(Tablero, Y, X, vac, NewTablero),
     moverRaton(NewTablero, (NX,NY), N, M, ND, 7, [(X,Y)|Pasos], Resultado).
 
@@ -115,7 +120,7 @@ accion(Tablero, (X,Y), N, M, _, Estado, ron, Pasos, Resultado):-
 % si el raton muere, entonces se llama a la accion de terminar el recorrido
 
 accion(Tablero, (X,Y), N, M, D, Estado, ven, Pasos, Resultado):-
-    movSec((X,Y), D, N, M, Estado, (NX,NY), ND),
+    movSec((X,Y), D, N, M, Estado, (NX,NY), ND,_),
     comerQueso(Tablero, Y, X, vac, NewTablero),
     (Estado < 1 -> moverRaton( Tablero, (NX,NY), N, M, ND, Estado, [(X,Y)|Pasos], Resultado);
         accion(NewTablero,(X,Y),N,M,D,Estado,aux2,[(X,Y)|Pasos],Resultado)
